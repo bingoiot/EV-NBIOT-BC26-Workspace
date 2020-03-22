@@ -1,0 +1,100 @@
+##==========================================================================
+ #                   Quectel OpenCPU
+ #
+ #              Copyright(c) 2012-2013 Quectel Ltd. All rights reserved.
+ #
+ #--------------------------------------------------------------------------
+ # File Description
+ # ----------------
+ #      OpenCPU makefile for GCC.
+ #
+ #--------------------------------------------------------------------------
+ #==========================================================================
+
+#-------------------------------------------------------------------------------
+# Configure GCC installation path, and GCC version.
+# To execute "arm-none-eabi-gcc -v" in command line can get the current gcc version 
+#-------------------------------------------------------------------------------
+GCC_INSTALL_PATH=tools\gcc\win\gcc-arm-none-eabi
+GCC_VERSION=4.8.3
+
+#C_PREDEF=-D __CUSTOMER_CODE__
+#C_PREDEF=-D __EXAMPLE_GPIO__
+#C_PREDEF=-D __EXAMPLE_MULTITASK__
+#C_PREDEF=-D __EXAMPLE_LwM2M__
+#C_PREDEF=-D __EXAMPLE_ONENET__
+
+#-------------------------------------------------------------------------------
+# Configure version and out target
+#-------------------------------------------------------------------------------
+PLATFORM = APPGS3MD
+MEMORY   = M32
+VERSION  = A01
+TARGET   = $(strip $(PLATFORM))$(strip $(MEMORY))$(strip $(VERSION))
+
+#-------------------------------------------------------------------------------
+# Configure the include directories
+#-------------------------------------------------------------------------------
+INCS =  -I $(ENV_INC) 
+INCS += -I ./           \
+        -I include      \
+        -I ril/inc      \
+        -I App/Pluto-Switch3-V1.0/config   \
+        -I pluto 	\
+        -I pluto/fs \
+        -I pluto/json \
+        -I pluto/socket \
+        -I pluto/spiffs 
+
+#-------------------------------------------------------------------------------
+# Configure source code dirctories
+#-------------------------------------------------------------------------------
+SRC_DIRS=example    \
+		ril\src    \
+		 App\Pluto-Switch3-V1.0     \
+		 App\Pluto-Switch3-V1.0\config     \
+         pluto 	\
+         pluto\fs \
+         pluto\json \
+         pluto\socket \
+         pluto\spiffs 
+
+#-------------------------------------------------------------------------------
+# Configure source code files to compile in the source code directories
+#-------------------------------------------------------------------------------
+SRC_SYS=$(wildcard App/Pluto-Switch3-V1.0/config/*.c)
+SRC_SYS_RIL=$(wildcard ril/src/*.c)
+SRC_EXAMPLE=$(wildcard example/*.c)
+SRC_CUS=$(wildcard App/Pluto-Switch3-V1.0/*.c)
+
+PLUTO_BASIC=$(wildcard pluto/*.c)
+PLUTO_FS=$(wildcard pluto/fs/*.c)
+PLUTO_JSON=$(wildcard pluto/json/*.c)
+PLUTO_SOCKET=$(wildcard pluto/socket/*.c)
+PLUTO_SPIFFS=$(wildcard pluto/spiffs/*.c)
+
+OBJS=\
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_SYS))        \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_SYS_RIL))    \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_EXAMPLE))    \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(SRC_CUS))        \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(PLUTO_BASIC))       \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(PLUTO_FS))       \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(PLUTO_JSON))       \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(PLUTO_SOCKET))       \
+	 $(patsubst %.c, $(OBJ_DIR)/%.o, $(PLUTO_SPIFFS))       \
+
+#-------------------------------------------------------------------------------
+# Configure user reference library
+#-------------------------------------------------------------------------------
+USERLIB=pluto/plutolib.a
+USERLIB+=libs/gcc/app_start.lib
+
+.PHONY: all
+all:
+#	$(warning <-- make all, C_PREDEF=$(C_PREDEF) -->)
+	@$(MAKE) new -f make/gcc/gcc_makefile
+
+include make\gcc\gcc_makefiledef
+
+export GCC_INSTALL_PATH C_PREDEF OBJS USERLIB SRC_DIRS
